@@ -31,10 +31,16 @@ import {
   timeOutline,
   trashOutline,
 } from 'ionicons/icons';
-import { InventoryService } from './inventory.service';
-import { ExpirationState, InventoryItem, InventoryItemInput, StockLevel } from './inventory.models';
 import { AuthService } from '../core/auth.service';
 import { apiErrorMessage } from '../core/api.service';
+import type { ExpirationState, InventoryItem, InventoryItemInput, StockLevel } from './inventory.models';
+import { InventoryService } from './inventory.service';
+import {
+  calculateStockPercentage,
+  expirationStateForDate,
+  parseInventoryDate,
+  stockLevelForPercentage,
+} from './inventory.utils';
 
 type DialogMode = 'add' | 'edit' | 'restock' | null;
 
@@ -276,27 +282,16 @@ export class InventoryPage {
   }
 
   stockLevel(item: InventoryItem): StockLevel {
-    const percentage = this.stockPercentage(item);
-    if (percentage === 0) return 'Depleted';
-    if (percentage <= 25) return 'Critical';
-    if (percentage <= 50) return 'Medium';
-    return 'Normal';
+    return stockLevelForPercentage(this.stockPercentage(item));
   }
 
   expirationState(item: InventoryItem): ExpirationState {
-    if (!item.expirationDate) return null;
-    const expiration = parseLocalDate(item.expirationDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const daysUntilExpiration = Math.floor((expiration.getTime() - today.getTime()) / 86_400_000);
-    if (daysUntilExpiration <= 0) return 'Expired';
-    if (daysUntilExpiration <= 7) return 'Expiring soon';
-    return null;
+    return expirationStateForDate(item.expirationDate);
   }
 
   formatDate(date: string): string {
     return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(
-      parseLocalDate(date),
+      parseInventoryDate(date),
     );
   }
 
@@ -305,14 +300,4 @@ export class InventoryPage {
     if (category === 'Feeds' || category === 'Vitamins' || category === 'Bedding') return 'leaf-outline';
     return 'cube-outline';
   }
-}
-
-export function calculateStockPercentage(quantity: number, referenceQuantity: number): number {
-  if (quantity <= 0 || referenceQuantity <= 0) return 0;
-  return Math.min(100, (quantity / referenceQuantity) * 100);
-}
-
-function parseLocalDate(date: string): Date {
-  const [year, month, day] = date.split('-').map(Number);
-  return new Date(year, month - 1, day);
 }

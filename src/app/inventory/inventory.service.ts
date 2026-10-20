@@ -65,6 +65,7 @@ export class InventoryService {
     this.syncSubscription = timer(0, 5000)
       .pipe(
         filter(() => !document.hidden),
+        // Ignore timer ticks while the previous pair of API reads is still running.
         exhaustMap(() => this.refreshData()),
       )
       .subscribe();
