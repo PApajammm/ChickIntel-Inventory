@@ -1,0 +1,7 @@
+{
+  "name": "ChickIntel-Inventory",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
