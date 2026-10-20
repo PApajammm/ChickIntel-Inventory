@@ -2,6 +2,15 @@
 
 This API is for local development with the repository's Angular app and XAMPP. It uses PHP sessions, PDO prepared statements, per-user inventory ownership, and MariaDB/MySQL.
 
+## Code layout
+
+- `public/index.php` bootstraps configuration, HTTP headers, the session, and API dispatch.
+- `src/router.php` maps API routes to their handlers.
+- `src/auth.php` owns registration, login, and session/CSRF helpers.
+- `src/inventory-data.php` formats and retrieves inventory records and writes activity history.
+- `src/request-validation.php` validates JSON request bodies and inventory fields.
+- `src/database.php` creates the PDO connection; `src/http.php` handles CORS, JSON responses, and API errors.
+
 ## Local setup
 
 1. Import `database/schema.sql` into the running XAMPP MySQL/MariaDB server. The schema creates the `chickintel_inventory` database and its tables.
