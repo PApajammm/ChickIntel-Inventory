@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonIcon, IonInput } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { arrowForwardOutline, leafOutline, lockClosedOutline, mailOutline } from 'ionicons/icons';
+import { arrowForwardOutline, eyeOffOutline, eyeOutline, leafOutline, lockClosedOutline, mailOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth.service';
 import { apiErrorMessage } from '../core/api.service';
 
@@ -23,9 +23,14 @@ export class LoginPage {
   message = '';
   loading = false;
   formError = '';
+  passwordVisible = false;
 
   constructor() {
-    addIcons({ arrowForwardOutline, leafOutline, lockClosedOutline, mailOutline });
+    addIcons({ arrowForwardOutline, eyeOffOutline, eyeOutline, leafOutline, lockClosedOutline, mailOutline });
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
   }
 
   submitLogin(): void {

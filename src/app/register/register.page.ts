@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { IonButton, IonContent, IonIcon, IonInput } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { arrowForwardOutline, leafOutline, lockClosedOutline, mailOutline, personOutline } from 'ionicons/icons';
+import { arrowForwardOutline, eyeOffOutline, eyeOutline, leafOutline, lockClosedOutline, mailOutline, personOutline } from 'ionicons/icons';
 import { AuthService } from '../core/auth.service';
 import { apiErrorMessage } from '../core/api.service';
 
@@ -24,9 +24,19 @@ export class RegisterPage {
   message = '';
   formError = '';
   loading = false;
+  passwordVisible = false;
+  confirmPasswordVisible = false;
 
   constructor() {
-    addIcons({ arrowForwardOutline, leafOutline, lockClosedOutline, mailOutline, personOutline });
+    addIcons({ arrowForwardOutline, eyeOffOutline, eyeOutline, leafOutline, lockClosedOutline, mailOutline, personOutline });
+  }
+
+  togglePasswordVisibility(field: 'password' | 'confirmPassword'): void {
+    if (field === 'password') {
+      this.passwordVisible = !this.passwordVisible;
+      return;
+    }
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
   }
 
   submitRegistration(): void {

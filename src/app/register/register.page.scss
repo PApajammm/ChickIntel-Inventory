@@ -42,6 +42,9 @@ ion-content { --background: #f4f6f4; }
 .input-wrap:focus-within { border-color: #829889; box-shadow: 0 0 0 3px rgb(103 124 105 / 10%); }
 .input-wrap > ion-icon { color: #809087; font-size: 18px; }
 .input-wrap ion-input { --padding-start: 0; --padding-end: 0; color: #293a32; font-size: 14px; }
+.password-visibility { position: relative; z-index: 1; width: 34px; height: 34px; padding: 0; display: grid; flex: 0 0 auto; place-items: center; border: 0; border-radius: 6px; background: transparent; color: #738078; cursor: pointer; }
+.password-visibility ion-icon { font-size: 18px; }
+.password-visibility:focus-visible { outline: 2px solid #677c69; outline-offset: 2px; }
 .submit-button { --background: var(--primary); --background-hover: #31423d; --border-radius: 8px; height: 48px; margin: 23px 0 0; font-size: 14px; font-weight: 650; text-transform: none; }
 .submit-button ion-icon { font-size: 18px; }
 .switch-copy { margin: 20px 0 0; color: #748078; font-size: 13px; text-align: center; }
@@ -84,6 +87,8 @@ ion-content { --background: #f4f6f4; }
   .input-wrap { min-height: 42px; padding-right: 11px; padding-left: 11px; gap: 9px; border-radius: 7px; }
   .input-wrap > ion-icon { font-size: 16px; }
   .input-wrap ion-input { font-size: 12px; }
+  .password-visibility { width: 32px; height: 32px; }
+  .password-visibility ion-icon { font-size: 17px; }
   .submit-button { height: 43px; margin-top: 20px; font-size: 12px; }
   .submit-button ion-icon { font-size: 16px; }
   .switch-copy { margin-top: 18px; font-size: 11px; }

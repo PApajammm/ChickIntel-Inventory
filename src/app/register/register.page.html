@@ -41,13 +41,31 @@
           <label class="field-label spaced-label" for="register-password">Password</label>
           <div class="input-wrap">
             <ion-icon name="lock-closed-outline"></ion-icon>
-            <ion-input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" [(ngModel)]="password"></ion-input>
+            <ion-input id="register-password" name="password" [type]="passwordVisible ? 'text' : 'password'" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" [(ngModel)]="password"></ion-input>
+            <button
+              class="password-visibility"
+              type="button"
+              [attr.aria-label]="passwordVisible ? 'Hide password' : 'Show password'"
+              [attr.aria-pressed]="passwordVisible"
+              (click)="togglePasswordVisibility('password')"
+            >
+              <ion-icon [name]="passwordVisible ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+            </button>
           </div>
 
           <label class="field-label spaced-label" for="register-confirm-password">Confirm password</label>
           <div class="input-wrap">
             <ion-icon name="lock-closed-outline"></ion-icon>
-            <ion-input id="register-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" placeholder="Enter your password again" [(ngModel)]="confirmPassword"></ion-input>
+            <ion-input id="register-confirm-password" name="confirmPassword" [type]="confirmPasswordVisible ? 'text' : 'password'" autocomplete="new-password" required minlength="8" placeholder="Enter your password again" [(ngModel)]="confirmPassword"></ion-input>
+            <button
+              class="password-visibility"
+              type="button"
+              [attr.aria-label]="confirmPasswordVisible ? 'Hide confirm password' : 'Show confirm password'"
+              [attr.aria-pressed]="confirmPasswordVisible"
+              (click)="togglePasswordVisibility('confirmPassword')"
+            >
+              <ion-icon [name]="confirmPasswordVisible ? 'eye-off-outline' : 'eye-outline'" aria-hidden="true"></ion-icon>
+            </button>
           </div>
 
           @if (formError) {
