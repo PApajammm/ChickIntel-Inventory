@@ -15,7 +15,7 @@ This document records the current implementation status of the Inventory module 
 | **II.a — Firebase or XAMPP setup/connectivity** | ✅ Implemented for local XAMPP development | Angular connects to the PHP API served by Apache, and the API reads/writes the MariaDB/MySQL database. The local API health endpoint returned HTTP 200. This is a development setup, not a production deployment. |
 | **II.b — Real-time communication/data sync** | ✅ Implemented — near-real-time polling | The Inventory and History screens poll the authenticated API every five seconds while visible and pause polling while hidden. Cross-session testing confirmed inventory changes and history entries made in a second authenticated session appeared in the open app. This is HTTP polling, not push-based WebSocket/Firebase synchronization. |
 | **III.a — Modular/readable code and meaningful comments** | 🟡 Mostly implemented | UI pages, API/auth services, inventory state, and PHP API are separated into modules. Build and lint pass. Comments are used where useful rather than added mechanically; a broader manual code-quality review has not been recorded. |
-| **III.b — Effective branching and merging strategy** | ⚪ Not demonstrated | Repository history currently shows only the `master` branch and an initial commit. Use and document feature branches and reviewed merges to provide evidence for this criterion. |
+| **III.b — Effective branching and merging strategy** | 🟡 In progress | A feature branch, `docs/branching-strategy-evidence`, is being used for this assessment update. The work still needs to be pushed, reviewed in a GitHub pull request, and merged to `master`; one branch/PR is initial evidence, not proof of a sustained team workflow. |
 | **IV.a — Visuals and theme consistency** | ✅ Implemented for responsive web UI | The inventory, history, login, and registration screens share the ChickIntel green theme and responsive layouts. Desktop and mobile browser layouts were checked; native Android UI behavior remains unverified. |
 | **IV.b — User-friendly navigation and flow** | ✅ Implemented for browser flows | Login/registration, protected routes, inventory actions, history navigation, validation, and sign-out are implemented. Android-specific usability has not been tested. |
 | **V.a — Clear verbal presentation** | ⚪ Not verifiable from source | Prepare and deliver a presentation explaining the project goal, inventory features, backend flow, and the limits of local polling. |
@@ -23,6 +23,12 @@ This document records the current implementation status of the Inventory module 
 | **V.c — Working app demonstration** | 🟡 Local web demo verified | The app and XAMPP API have been exercised locally, including cross-session sync. For an in-person demonstration, confirm Apache/MySQL availability and test with demo accounts beforehand. Android demonstration is not verified. |
 | **VI.a — Project summary and purpose** | 🟡 Partial | This assessment identifies the project and its Inventory scope; a complete project overview covering goals, architecture, setup, and features should be added to the main project documentation. |
 | **VI.b — Screenshots and architecture diagrams** | ❌ Not included | Add current app screenshots and an architecture diagram showing Ionic Angular → PHP API (Apache) → MariaDB/MySQL. |
+
+## Branching and merging workflow
+
+Use `master` as the stable branch and create a short-lived branch for each focused feature, fix, or documentation change. Commit related work with descriptive messages, push the branch, and open a pull request targeting `master`. Run the relevant build, lint, and tests before requesting review. Review the diff and checks before merging; for team work, request review from another member where possible. Delete merged feature branches after confirming the merge.
+
+**Current evidence:** This assessment update is on `docs/branching-strategy-evidence`. It is not yet evidence of a completed merge until its pull request is reviewed and merged. Continue using the workflow for future work and record contributors/reviewers for the team-process portion of the rubric.
 
 ## Live-sync verification
 
@@ -54,4 +60,3 @@ Use the same `127.0.0.1` host consistently for the frontend and configured local
 - Local API health endpoint: HTTP 200.
 - Cross-session inventory and history polling: passed.
 - Android emulator/device test: not performed.
-
