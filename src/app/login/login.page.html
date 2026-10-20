@@ -1,0 +1,61 @@
+<ion-content [fullscreen]="true">
+  <main class="auth-page">
+    <a class="brand" routerLink="/inventory" aria-label="ChickIntel Inventory">
+      <span class="brand-mark"><ion-icon name="leaf-outline"></ion-icon></span>
+      <span class="brand-name">Chick<span>Intel</span></span>
+    </a>
+
+    <section class="auth-layout">
+      <div class="welcome-panel">
+        <span class="welcome-kicker">SMARTER POULTRY MANAGEMENT</span>
+        <div class="illustration" aria-hidden="true">
+          <span class="sun"></span><span class="field field-one"></span><span class="field field-two"></span>
+          <span class="coop"><span class="coop-roof"></span><span class="coop-body"><span class="coop-door"></span></span></span>
+          <span class="sprout sprout-one"></span><span class="sprout sprout-two"></span>
+        </div>
+        <h1>Healthy flocks.<br /><em>Smarter farms.</em></h1>
+        <p>One clear view of your poultry operation, from flock health to everyday supplies.</p>
+        <div class="welcome-bottom"><span class="welcome-dot"></span> Your farm, thoughtfully managed</div>
+      </div>
+
+      <section class="auth-card">
+        <div class="form-heading">
+          <p class="eyebrow">WELCOME BACK</p>
+          <h2>Sign in to your account</h2>
+          <p>Enter your details to continue to ChickIntel.</p>
+        </div>
+
+        <form (ngSubmit)="submitLogin()" #loginForm="ngForm">
+          <label class="field-label" for="login-email">Email address</label>
+          <div class="input-wrap">
+            <ion-icon name="mail-outline"></ion-icon>
+            <ion-input id="login-email" name="email" type="email" autocomplete="email" required email placeholder="you@example.com" [(ngModel)]="email"></ion-input>
+          </div>
+
+          <div class="password-label">
+            <label class="field-label" for="login-password">Password</label>
+          </div>
+          <div class="input-wrap">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-input id="login-password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="Enter your password" [(ngModel)]="password"></ion-input>
+          </div>
+
+          @if (formError) {
+            <p class="form-error" role="alert">{{ formError }}</p>
+          }
+          <ion-button class="submit-button" type="submit" expand="block" [disabled]="loginForm.invalid || loading">
+            {{ loading ? 'Signing in...' : 'Sign in' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+          </ion-button>
+        </form>
+
+        @if (message) {
+          <p class="demo-message" role="status">{{ message }}</p>
+        }
+
+        <p class="switch-copy">New to ChickIntel? <a routerLink="/register">Create an account</a></p>
+        <p class="demo-note"><span></span> Secure sign-in to your farm inventory</p>
+      </section>
+    </section>
+    <footer class="auth-footer"><span>© 2026 ChickIntel</span><span>Smart chicken poultry management</span></footer>
+  </main>
+</ion-content>

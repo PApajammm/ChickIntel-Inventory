@@ -1,0 +1,65 @@
+<ion-header class="app-header">
+  <ion-toolbar>
+    <div class="topbar">
+      <a class="brand" routerLink="/inventory" aria-label="Return to ChickIntel Inventory">
+        <span class="brand-mark"><ion-icon name="leaf-outline"></ion-icon></span>
+        <span class="brand-name">Chick<span>Intel</span></span>
+      </a>
+      <a class="back-link" routerLink="/inventory"><ion-icon name="arrow-back-outline"></ion-icon><span>Back to inventory</span></a>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="history-shell">
+    <div class="breadcrumbs"><a routerLink="/inventory">Inventory</a><span>/</span><strong>History</strong></div>
+    <section class="page-heading">
+      <div><p class="eyebrow">FARM OPERATIONS</p><h1>Inventory history</h1><p>Review recent changes made to your inventory.</p></div>
+      <div class="history-count"><ion-icon name="time-outline"></ion-icon>{{ inventory.history().length }} recent {{ inventory.history().length === 1 ? 'activity' : 'activities' }}</div>
+    </section>
+    <div class="sync-status" [class.sync-offline]="inventory.syncError()" role="status">
+      <span class="sync-dot"></span>
+      @if (inventory.syncError()) {
+        {{ inventory.syncError() }}
+      } @else if (inventory.lastSyncedAt()) {
+        Live updates · refreshed every 5 seconds · last sync {{ inventory.lastSyncedAt() | date:'shortTime' }}
+      } @else {
+        Connecting to live updates...
+      }
+    </div>
+
+    <section class="history-panel">
+      <header><div><h2>Activity log</h2><p>Item additions, stock changes, and updates.</p></div><span class="temporary-badge">SAVED HISTORY</span></header>
+      @if (inventory.loading()) {
+      <div class="empty-history">Loading activity...</div>
+      } @else if (inventory.history().length) {
+      <div class="history-list">
+        @for (entry of inventory.history(); track entry.id) {
+        <article class="history-entry">
+          <span class="entry-icon" [ngClass]="{
+            'entry-added': entry.action === 'Item added',
+            'entry-restocked': entry.action === 'Item restocked',
+            'entry-updated': entry.action === 'Item updated',
+            'entry-deleted': entry.action === 'Item deleted'
+          }"><ion-icon [name]="actionIcon(entry.action)"></ion-icon></span>
+          <div class="entry-main">
+            <div class="entry-title"><strong>{{ entry.itemName }}</strong><span class="action-badge" [ngClass]="'action-' + entry.action.toLowerCase().replace(' ', '-')">{{ entry.action }}</span></div>
+            @if (entry.notes) { <p class="entry-notes">{{ entry.notes }}</p> }
+            <span class="entry-date">{{ formatDate(entry.createdAt) }}</span>
+          </div>
+          @if (entry.quantityChange !== undefined) {
+          <span class="quantity-change" [class.quantity-negative]="entry.quantityChange < 0">
+            {{ entry.quantityChange > 0 ? '+' : '' }}{{ entry.quantityChange }}
+            <small>units</small>
+          </span>
+          }
+        </article>
+        }
+      </div>
+      } @else {
+        <div class="empty-history"><span><ion-icon name="time-outline"></ion-icon></span><h3>No activity yet</h3><p>Inventory changes will appear here.</p></div>
+      }
+      <footer>Activity is saved with your account.</footer>
+    </section>
+  </main>
+</ion-content>

@@ -1,0 +1,71 @@
+<ion-content [fullscreen]="true">
+  <main class="auth-page">
+    <a class="brand" routerLink="/inventory" aria-label="ChickIntel Inventory">
+      <span class="brand-mark"><ion-icon name="leaf-outline"></ion-icon></span>
+      <span class="brand-name">Chick<span>Intel</span></span>
+    </a>
+
+    <section class="auth-layout">
+      <div class="welcome-panel">
+        <span class="welcome-kicker">GROW WITH CONFIDENCE</span>
+        <div class="illustration" aria-hidden="true">
+          <span class="sun"></span><span class="field field-one"></span><span class="field field-two"></span>
+          <span class="coop"><span class="coop-roof"></span><span class="coop-body"><span class="coop-door"></span></span></span>
+          <span class="sprout sprout-one"></span><span class="sprout sprout-two"></span>
+        </div>
+        <h1>Make room for<br /><em>better farming.</em></h1>
+        <p>Bring your poultry supplies and daily farm operations together in one simple workspace.</p>
+        <div class="welcome-bottom"><span class="welcome-dot"></span> A clearer view of your operation</div>
+      </div>
+
+      <section class="auth-card">
+        <div class="form-heading">
+          <p class="eyebrow">GET STARTED</p>
+          <h2>Create your account</h2>
+          <p>Set up your ChickIntel workspace details.</p>
+        </div>
+
+        <form (ngSubmit)="submitRegistration()" #registrationForm="ngForm">
+          <label class="field-label" for="register-name">Full name</label>
+          <div class="input-wrap">
+            <ion-icon name="person-outline"></ion-icon>
+            <ion-input id="register-name" name="fullName" autocomplete="name" required maxlength="100" placeholder="Your name" [(ngModel)]="fullName"></ion-input>
+          </div>
+
+          <label class="field-label spaced-label" for="register-email">Email address</label>
+          <div class="input-wrap">
+            <ion-icon name="mail-outline"></ion-icon>
+            <ion-input id="register-email" name="email" type="email" autocomplete="email" required email placeholder="you@example.com" [(ngModel)]="email"></ion-input>
+          </div>
+
+          <label class="field-label spaced-label" for="register-password">Password</label>
+          <div class="input-wrap">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters" [(ngModel)]="password"></ion-input>
+          </div>
+
+          <label class="field-label spaced-label" for="register-confirm-password">Confirm password</label>
+          <div class="input-wrap">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-input id="register-confirm-password" name="confirmPassword" type="password" autocomplete="new-password" required minlength="8" placeholder="Enter your password again" [(ngModel)]="confirmPassword"></ion-input>
+          </div>
+
+          @if (formError) {
+            <p class="form-error" role="alert">{{ formError }}</p>
+          }
+          @if (message) {
+            <p class="demo-message" role="status">{{ message }}</p>
+          }
+
+          <ion-button class="submit-button" type="submit" expand="block" [disabled]="registrationForm.invalid || loading">
+            {{ loading ? 'Creating account...' : 'Create account' }} <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+          </ion-button>
+        </form>
+
+        <p class="switch-copy">Already have an account? <a routerLink="/login">Sign in</a></p>
+        <p class="demo-note"><span></span> Your inventory is private to your account</p>
+      </section>
+    </section>
+    <footer class="auth-footer"><span>© 2026 ChickIntel</span><span>Smart chicken poultry management</span></footer>
+  </main>
+</ion-content>

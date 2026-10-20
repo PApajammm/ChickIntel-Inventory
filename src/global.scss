@@ -35,3 +35,46 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+:root {
+  color-scheme: light;
+  --ion-color-primary: #40534d;
+  --ion-color-primary-rgb: 64, 83, 77;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #384943;
+  --ion-color-primary-tint: #53645f;
+  --ion-font-family: Inter, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background: #f4f6f4;
+  color: #1f2e2b;
+}
+
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -8px 0 16px;
+  color: #68776e;
+  font-size: 11px;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #4b8b57;
+  box-shadow: 0 0 0 3px #e5f1e7;
+}
+
+.sync-offline {
+  color: #a12d28;
+}
+
+.sync-offline .sync-dot {
+  background: #c63b34;
+  box-shadow: 0 0 0 3px #f8e6e4;
+}

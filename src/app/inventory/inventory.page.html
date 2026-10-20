@@ -1,0 +1,247 @@
+<ion-header class="app-header">
+  <ion-toolbar>
+    <div class="topbar">
+      <a class="brand" routerLink="/inventory" aria-label="ChickIntel Inventory home">
+        <span class="brand-mark"><ion-icon name="leaf-outline"></ion-icon></span>
+        <span class="brand-name">Chick<span>Intel</span></span>
+      </a>
+      <div class="topbar-right">
+        <span class="workspace-label">POULTRY MANAGEMENT</span>
+        <a class="history-link" routerLink="/inventory/history">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Inventory history</span>
+        </a>
+        <button type="button" class="account-link sign-out-button" (click)="signOut()">Sign out</button>
+        <span class="avatar" aria-label="User profile">CI</span>
+      </div>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="page-shell">
+    <div class="breadcrumbs"><span>Management</span><span class="crumb-divider">/</span><strong>Inventory</strong></div>
+
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">FARM OPERATIONS</p>
+        <h1>Inventory</h1>
+        <p class="heading-description">Keep track of supplies, stock levels, and expiry dates.</p>
+      </div>
+      <ion-button class="add-button" (click)="openAddDialog()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Add inventory item
+      </ion-button>
+    </section>
+
+    @if (inventory.loadError()) {
+    <div class="api-error" role="alert">{{ inventory.loadError() }}</div>
+    }
+    <div class="sync-status" [class.sync-offline]="inventory.syncError()" role="status">
+      <span class="sync-dot"></span>
+      @if (inventory.syncError()) {
+        {{ inventory.syncError() }}
+      } @else if (inventory.lastSyncedAt()) {
+        Live updates · refreshed every 5 seconds · last sync {{ inventory.lastSyncedAt() | date:'shortTime' }}
+      } @else {
+        Connecting to live updates...
+      }
+    </div>
+
+    <section class="alert-list" aria-label="Expiration alerts">
+      @if (expiredItems().length) {
+      <div class="expiration-alert expired-alert" role="status">
+        <span class="alert-icon"><ion-icon name="alert-circle-outline"></ion-icon></span>
+        <div class="alert-copy">
+          <strong>{{ expiredItems().length }} {{ expiredItems().length === 1 ? 'item has' : 'items have' }} expired</strong>
+          <span>{{ expiredItems().length === 1 ? expiredItems()[0].name : 'Review expired items and remove them from use.' }}</span>
+        </div>
+        <span class="alert-count">{{ expiredItems().length }} expired</span>
+      </div>
+      }
+      @if (soonItems().length) {
+      <div class="expiration-alert soon-alert" role="status">
+        <span class="alert-icon"><ion-icon name="time-outline"></ion-icon></span>
+        <div class="alert-copy">
+          <strong>{{ soonItems().length }} {{ soonItems().length === 1 ? 'item is' : 'items are' }} expiring soon</strong>
+          <span>These items expire within the next 7 days.</span>
+        </div>
+        <span class="alert-count">{{ soonItems().length }} upcoming</span>
+      </div>
+      }
+    </section>
+
+    <section class="summary-grid" aria-label="Inventory summary">
+      <article class="summary-card">
+        <span class="summary-icon inventory-icon"><ion-icon name="cube-outline"></ion-icon></span>
+        <div><span class="summary-label">Total items</span><strong>{{ inventory.items().length }}</strong><small>Across all categories</small></div>
+      </article>
+      <article class="summary-card">
+        <span class="summary-icon healthy-icon"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+        <div><span class="summary-label">Healthy stock</span><strong>{{ healthyCount() }}</strong><small>Items above 50%</small></div>
+      </article>
+      <article class="summary-card">
+        <span class="summary-icon attention-icon"><ion-icon name="alert-circle-outline"></ion-icon></span>
+        <div><span class="summary-label">Needs attention</span><strong>{{ attentionCount() }}</strong><small>Critical or depleted</small></div>
+      </article>
+    </section>
+
+    <section class="inventory-panel">
+      <div class="panel-heading">
+        <div><h2>Inventory items</h2><p>Manage supplies and monitor stock at a glance.</p></div>
+        <span class="item-total">{{ filteredItems.length }} {{ filteredItems.length === 1 ? 'item' : 'items' }}</span>
+      </div>
+
+      <div class="list-controls">
+        <div class="search-box">
+          <ion-icon name="search-outline"></ion-icon>
+          <ion-input
+            aria-label="Search inventory"
+            placeholder="Search items, categories, notes..."
+            [ngModel]="searchTerm"
+            (ngModelChange)="searchTerm = $event"
+            [clearInput]="true"
+          ></ion-input>
+        </div>
+        <div class="category-filter-label"><ion-icon name="filter-outline"></ion-icon><span>Category</span></div>
+      </div>
+
+      <nav class="category-tabs" aria-label="Filter by category">
+        @for (category of categories(); track category) {
+        <button
+          type="button"
+          [class.active]="selectedCategory === category"
+          [attr.aria-pressed]="selectedCategory === category"
+          (click)="setCategory(category)"
+        >{{ category }}</button>
+        }
+      </nav>
+
+      @if (inventory.loading()) {
+      <div class="loading-state" role="status">Loading inventory...</div>
+      } @else if (filteredItems.length) {
+      <div class="table-scroll">
+        <table class="inventory-table">
+          <thead>
+            <tr>
+              <th scope="col">Item</th>
+              <th scope="col">Category</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Unit price</th>
+              <th scope="col">Expiration</th>
+              <th scope="col">Stock level</th>
+              <th scope="col" class="actions-heading">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredItems; track item.id) {
+            <tr>
+              <td data-label="Item">
+                <div class="item-cell">
+                  <span class="item-icon"><ion-icon [name]="categoryIcon(item.category)"></ion-icon></span>
+                  <div class="item-copy"><strong>{{ item.name }}</strong>                  @if (item.notes) { <span>{{ item.notes }}</span> }</div>
+                </div>
+              </td>
+              <td data-label="Category"><span class="category-badge">{{ item.category }}</span></td>
+              <td data-label="Quantity"><strong class="quantity">{{ item.quantity }}</strong><span class="unit">{{ item.unit }}</span></td>
+              <td data-label="Unit price" class="price">{{ item.unitPrice === undefined ? '—' : ('₱' + (item.unitPrice | number:'1.2-2')) }}</td>
+              <td data-label="Expiration">
+                @if (item.expirationDate) {
+                <span class="expiration-date" [class.expired-text]="expirationState(item) === 'Expired'" [class.soon-text]="expirationState(item) === 'Expiring soon'">
+                  {{ formatDate(item.expirationDate) }}
+                  @if (expirationState(item)) { <small>{{ expirationState(item) }}</small> }
+                </span>
+                } @else { <span class="muted">No expiry</span> }
+              </td>
+              <td data-label="Stock level">
+                <div class="stock-cell">
+                  <span class="status-badge" [ngClass]="'status-' + stockLevel(item).toLowerCase()">{{ stockLevel(item) }}</span>
+                  <div class="stock-track" role="progressbar" [attr.aria-label]="item.name + ' stock'" [attr.aria-valuenow]="stockPercentage(item)" aria-valuemin="0" aria-valuemax="100">
+                    <span [ngClass]="'bar-' + stockLevel(item).toLowerCase()" [style.width.%]="stockPercentage(item)"></span>
+                  </div>
+                  <small>{{ stockPercentage(item) | number:'1.0-1' }}% of reference stock</small>
+                </div>
+              </td>
+              <td data-label="Actions">
+                <div class="row-actions">
+                  <button type="button" class="action-button restock-action" (click)="openRestockDialog(item)" [attr.aria-label]="'Restock ' + item.name" title="Restock"><ion-icon name="add-outline"></ion-icon></button>
+                  <button type="button" class="action-button" (click)="openEditDialog(item)" [attr.aria-label]="'Edit ' + item.name" title="Edit"><ion-icon name="create-outline"></ion-icon></button>
+                  <button type="button" class="action-button delete-action" (click)="deleteItem(item)" [attr.aria-label]="'Delete ' + item.name" title="Delete"><ion-icon name="trash-outline"></ion-icon></button>
+                </div>
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      } @else {
+        <div class="empty-state">
+          <span class="empty-icon"><ion-icon name="search-outline"></ion-icon></span>
+          <h3>No inventory items found</h3>
+          <p>{{ searchTerm || selectedCategory !== 'All items' ? 'Try changing your search or category filter.' : 'Add your first item to start tracking farm supplies.' }}</p>
+          @if (!searchTerm && selectedCategory === 'All items') {
+          <ion-button fill="outline" (click)="openAddDialog()">Add an item</ion-button>
+          }
+        </div>
+      }
+      <footer class="table-footnote"><ion-icon name="alert-circle-outline"></ion-icon> Stock percentage uses a reference quantity recorded for each item; it is not a configured minimum stock level.</footer>
+    </section>
+    <p class="temporary-data-note">Inventory changes are saved to your account.</p>
+  </main>
+</ion-content>
+
+@if (dialogMode) {
+<div class="dialog-backdrop" (click)="closeDialog()">
+  <section class="dialog-card" role="dialog" aria-modal="true" [attr.aria-labelledby]="'dialog-title'" (click)="$event.stopPropagation()">
+    <header class="dialog-header">
+      <div><p class="eyebrow">{{ dialogMode === 'add' ? 'NEW SUPPLY' : dialogMode === 'edit' ? 'ITEM DETAILS' : 'STOCK UPDATE' }}</p>
+        <h2 id="dialog-title">{{ dialogMode === 'add' ? 'Add inventory item' : dialogMode === 'edit' ? 'Edit item' : 'Restock item' }}</h2></div>
+      <button type="button" class="close-button" aria-label="Close dialog" (click)="closeDialog()"><ion-icon name="close-outline"></ion-icon></button>
+    </header>
+
+    @if (dialogMode === 'restock') {
+      <div class="selected-item-note"><span class="item-icon"><ion-icon [name]="categoryIcon(selectedItem?.category ?? 'Equipment')"></ion-icon></span><span><strong>{{ selectedItem?.name }}</strong><small>Current stock: {{ selectedItem?.quantity }} {{ selectedItem?.unit }}</small></span></div>
+      <form (ngSubmit)="saveRestock()" #restockForm="ngForm">
+        <label class="field-label" for="restock-quantity">Quantity to add <span>*</span></label>
+        <ion-input id="restock-quantity" name="restockQuantity" type="number" min="0.01" step="any" required placeholder="Enter quantity" [(ngModel)]="restockQuantity"></ion-input>
+        <label class="field-label" for="restock-notes">Notes <span class="optional">(optional)</span></label>
+        <ion-input id="restock-notes" name="restockNotes" placeholder="Add a note about this restock" [(ngModel)]="restockNotes"></ion-input>
+        @if (formError) { <p class="form-error" role="alert">{{ formError }}</p> }
+        <div class="dialog-actions"><ion-button fill="outline" type="button" (click)="closeDialog()">Cancel</ion-button><ion-button type="submit">Update stock</ion-button></div>
+      </form>
+    } @else {
+      <form (ngSubmit)="saveItem()" #itemFormRef="ngForm">
+        <label class="field-label" for="item-name">Item name <span>*</span></label>
+        <ion-input id="item-name" name="itemName" required maxlength="80" placeholder="e.g. Starter crumble feed" [(ngModel)]="form.name"></ion-input>
+        <div class="form-row">
+          <div class="form-field"><label class="field-label" for="item-category">Category <span>*</span></label>
+            <ion-select id="item-category" name="category" interface="popover" required [(ngModel)]="form.category">
+              @for (category of categories().slice(1); track category) {
+              <ion-select-option [value]="category">{{ category }}</ion-select-option>
+              }
+              <ion-select-option value="Custom">Custom</ion-select-option>
+            </ion-select>
+          </div>
+          <div class="form-field"><label class="field-label" for="item-unit">Unit <span>*</span></label>
+            <ion-input id="item-unit" name="unit" required maxlength="20" placeholder="pcs, kg, bottles..." [(ngModel)]="form.unit"></ion-input>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-field"><label class="field-label" for="item-quantity">Quantity <span>*</span></label>
+            <ion-input id="item-quantity" name="quantity" type="number" min="0" step="any" required [(ngModel)]="form.quantity"></ion-input>
+          </div>
+          <div class="form-field"><label class="field-label" for="item-price">Unit price <span class="optional">(optional)</span></label>
+            <ion-input id="item-price" name="unitPrice" type="number" min="0" step="0.01" placeholder="0.00" [(ngModel)]="form.unitPrice"></ion-input>
+          </div>
+        </div>
+        <label class="field-label" for="item-expiration">Expiration date <span class="optional">(optional)</span></label>
+        <ion-input id="item-expiration" name="expirationDate" type="date" [(ngModel)]="form.expirationDate"></ion-input>
+        <label class="field-label" for="item-notes">Notes <span class="optional">(optional)</span></label>
+        <ion-input id="item-notes" name="notes" maxlength="180" placeholder="Storage location or other details" [(ngModel)]="form.notes"></ion-input>
+        @if (formError) { <p class="form-error" role="alert">{{ formError }}</p> }
+        <div class="dialog-actions"><ion-button fill="outline" type="button" (click)="closeDialog()">Cancel</ion-button><ion-button type="submit">{{ dialogMode === 'add' ? 'Add item' : 'Save changes' }}</ion-button></div>
+      </form>
+    }
+  </section>
+</div>
+}
