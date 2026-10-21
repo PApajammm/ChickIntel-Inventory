@@ -12,6 +12,7 @@ $config = [
     'allowed_origins' => [
         'http://127.0.0.1:4200',
         'http://localhost:4200',
+        'http://localhost',
     ],
     'session_name' => 'chickintel_session',
 ];
