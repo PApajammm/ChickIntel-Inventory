@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
+import { Observable, TimeoutError, catchError, finalize, map, of, shareReplay, switchMap, tap, throwError, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 interface ApiEnvelope<T> {
@@ -10,6 +10,8 @@ interface ApiEnvelope<T> {
 interface CsrfResponse {
   csrfToken: string;
 }
+
+const API_REQUEST_TIMEOUT_MS = 10000;
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -23,7 +25,7 @@ export class ApiService {
         params: new HttpParams().set('route', route),
         withCredentials: true,
       })
-      .pipe(map((response) => response.data));
+      .pipe(timeout({ first: API_REQUEST_TIMEOUT_MS }), map((response) => response.data));
   }
 
   post<T>(route: string, body: object): Observable<T> {
@@ -35,16 +37,13 @@ export class ApiService {
   }
 
   delete<T>(route: string): Observable<T> {
-    return this.withCsrfToken().pipe(
-      switchMap((token) =>
-        this.http.delete<ApiEnvelope<T>>(this.url(), {
-          params: new HttpParams().set('route', route),
-          headers: new HttpHeaders({ 'X-CSRF-Token': token }),
-          withCredentials: true,
-        }),
-      ),
-      map((response) => response.data),
-    );
+    return this.withCsrfToken((token) =>
+      this.http.delete<ApiEnvelope<T>>(this.url(), {
+        params: new HttpParams().set('route', route),
+        headers: new HttpHeaders({ 'X-CSRF-Token': token }),
+        withCredentials: true,
+      }).pipe(timeout({ first: API_REQUEST_TIMEOUT_MS })),
+    ).pipe(timeout({ first: API_REQUEST_TIMEOUT_MS }), map((response) => response.data));
   }
 
   setCsrfToken(token: string): void {
@@ -53,18 +52,19 @@ export class ApiService {
 
   clearCsrfToken(): void {
     this.csrfToken = null;
+    this.csrfRequest = null;
   }
 
   private mutate<T>(method: 'POST' | 'PATCH', route: string, body: object): Observable<T> {
-    return this.withCsrfToken().pipe(
-      switchMap((token) =>
-        this.http.request<ApiEnvelope<T>>(method, this.url(), {
-          params: new HttpParams().set('route', route),
-          headers: new HttpHeaders({ 'X-CSRF-Token': token }),
-          body,
-          withCredentials: true,
-        }),
-      ),
+    return this.withCsrfToken((token) =>
+      this.http.request<ApiEnvelope<T>>(method, this.url(), {
+        params: new HttpParams().set('route', route),
+        headers: new HttpHeaders({ 'X-CSRF-Token': token }),
+        body,
+        withCredentials: true,
+      }).pipe(timeout({ first: API_REQUEST_TIMEOUT_MS })),
+    ).pipe(
+      timeout({ first: API_REQUEST_TIMEOUT_MS }),
       map((response) => response.data),
       tap((response) => {
         if (isCsrfResponse(response)) this.setCsrfToken(response.csrfToken);
@@ -72,7 +72,22 @@ export class ApiService {
     );
   }
 
-  private withCsrfToken(): Observable<string> {
+  private withCsrfToken<T>(request: (token: string) => Observable<T>): Observable<T> {
+    return this.fetchCsrfToken().pipe(
+      switchMap((token) =>
+        request(token).pipe(
+          catchError((error: unknown) => {
+            if (!isExpiredCsrfError(error)) return throwError(() => error);
+
+            this.clearCsrfToken();
+            return this.fetchCsrfToken().pipe(switchMap((freshToken) => request(freshToken)));
+          }),
+        ),
+      ),
+    );
+  }
+
+  private fetchCsrfToken(): Observable<string> {
     if (this.csrfToken) return of(this.csrfToken);
     if (this.csrfRequest) return this.csrfRequest;
 
@@ -82,6 +97,7 @@ export class ApiService {
         withCredentials: true,
       })
       .pipe(
+        timeout({ first: API_REQUEST_TIMEOUT_MS }),
         map((response) => response.data.csrfToken),
         tap((token) => {
           this.setCsrfToken(token);
@@ -114,8 +130,26 @@ export function apiErrorMessage(error: unknown, fallback: string): string {
       }
     }
     if (error.status === 0) {
+      if (environment.apiUrl.startsWith('http://localhost:8080/')) {
+        return 'Cannot reach the PHP API. Connect the phone by USB, start Apache and MySQL, then run adb reverse tcp:8080 tcp:80 on your PC.';
+      }
       return 'Cannot reach the PHP API. Check that Apache and MySQL are running, then retry.';
     }
   }
+  if (error instanceof TimeoutError) {
+    return 'The request took too long. Check that Apache and MySQL are running, then try again.';
+  }
   return fallback;
+}
+
+function isExpiredCsrfError(error: unknown): boolean {
+  if (!(error instanceof HttpErrorResponse) || error.status !== 403) return false;
+
+  const body: unknown = error.error;
+  if (typeof body !== 'object' || body === null || !('error' in body)) return false;
+  const apiError: unknown = body.error;
+  return typeof apiError === 'object'
+    && apiError !== null
+    && 'message' in apiError
+    && apiError.message === 'Security token expired. Refresh the page and try again.';
 }
