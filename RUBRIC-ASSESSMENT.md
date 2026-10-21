@@ -1,6 +1,6 @@
 # ChickIntel Inventory Project Rubric Assessment
 
-**Assessment date:** October 20, 2026  
+**Assessment date:** October 21, 2026  
 **Project:** ChickIntel: Smart Chicken Poultry Health Monitoring and Management System Using CNN Algorithm — Inventory module
 
 This document records the current implementation status of the Inventory module against the supplied project rubric. Status reflects what is implemented and verified in this repository and its local XAMPP development setup; it does not claim unverified deployment or team-process work.
@@ -11,7 +11,7 @@ This document records the current implementation status of the Inventory module 
 |---|---|---|
 | **I.a — CRUD operations** | ✅ Implemented | Authenticated inventory create, read, update, restock, and delete operations are available through the PHP API and MariaDB/MySQL. CRUD and per-user data isolation were tested. |
 | **I.b — Navigation and screen flow** | ✅ Implemented | Login, registration, protected inventory, and inventory history screens are routed in the standalone Angular app. |
-| **I.c — Android emulator/device compatibility** | 🟡 Partial — not verified | Capacitor dependencies and configuration are present, but an Android native project has not been generated and no emulator/device run has been completed. Generate the Android project and test the primary flows on an emulator or device. |
+| **I.c — Android emulator/device compatibility** | ✅ Implemented | Generated and synced the Capacitor Android project, built the debug APK, and installed/launched it on an Infinix X6885 running Android API 36 over USB using ADB. The app process was confirmed running. Login and inventory/API flows are not yet verified on-device. |
 | **II.a — Firebase or XAMPP setup/connectivity** | ✅ Implemented for local XAMPP development | Angular connects to the PHP API served by Apache, and the API reads/writes the MariaDB/MySQL database. The local API health endpoint returned HTTP 200. This is a development setup, not a production deployment. |
 | **II.b — Real-time communication/data sync** | ✅ Implemented — near-real-time polling | The Inventory and History screens poll the authenticated API every five seconds while visible and pause polling while hidden. Cross-session testing confirmed inventory changes and history entries made in a second authenticated session appeared in the open app. This is HTTP polling, not push-based WebSocket/Firebase synchronization. |
 | **III.a — Modular/readable code and meaningful comments** | ✅ Implemented | Angular pages, core auth/API services, inventory state and tested domain utilities are separated by responsibility. The PHP entry point is a small bootstrap with routing, auth, data, validation, HTTP, and database modules under `backend/src/`. Comments clarify non-obvious ownership, transaction, CSRF, and polling behavior. Build, lint, focused utility tests, PHP syntax checks, and an API CRUD/history smoke test pass. |
@@ -59,4 +59,4 @@ Use the same `127.0.0.1` host consistently for the frontend and configured local
 - PHP API syntax check: passed.
 - Local API health endpoint: HTTP 200.
 - Cross-session inventory and history polling: passed.
-- Android emulator/device test: not performed.
+- Android physical-device build, installation, and launch: passed on Infinix X6885 (Android API 36); login and inventory/API flows remain unverified on-device.

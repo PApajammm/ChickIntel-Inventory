@@ -33,6 +33,18 @@ This API is for local development with the repository's Angular app and XAMPP. I
 
 The checked-in `config.php` contains the standard local XAMPP defaults (`root` with a blank password). For custom local settings, copy `config.local.example.php` to `config.local.php` and edit that ignored local-only file. Never commit database credentials. Use a dedicated restricted database account and HTTPS before exposing the API outside this development machine.
 
+## Android phone development
+
+The Android build uses `src/environments/environment.android.ts`, which points the app to `http://localhost:8080/chickintel-api/index.php`. For USB development, forward that device port to Apache on the computer:
+
+```powershell
+& 'C:\Users\Admin\AppData\Local\Android\Sdk\platform-tools\adb.exe' reverse tcp:8080 tcp:80
+npm run android:build
+npx cap run android
+```
+
+Keep the phone connected with USB debugging authorized, and keep Apache and MySQL running. The Android app's local WebView origin is `http://localhost`; the API allows that origin for credentialed requests. The Capacitor HTTP scheme and cleartext traffic setting are for this local XAMPP development workflow only. Do not use this HTTP configuration for a public or production build; use HTTPS and a production API instead.
+
 ## Routes
 
 - `GET auth/csrf`, `POST auth/register`, `POST auth/login`, `GET auth/me`, `POST auth/logout`
